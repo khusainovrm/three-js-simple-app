@@ -6,12 +6,6 @@ import { useRef } from 'react'
 import Button from '@material-ui/core/Button'
 import { useThree } from '../hooks/useThree'
 
-interface IBox {
-  width: number
-  height: number
-  depth: number
-}
-
 export default function Home() {
   const canvasMain = useRef<HTMLDivElement>(null)
 
@@ -25,22 +19,20 @@ export default function Home() {
         <div ref={canvasMain} className={styles.mainCanvas} />
         <div className={styles.content + ' App'}>
           <Formik
-            initialValues={{ width: 42, height: 10, depth: 10 }}
-            onSubmit={(values, { setSubmitting }) => {
-              setSubmitting(true)
+            initialValues={{ width: 10, height: 10, depth: 10 }}
+            onSubmit={({ width, height, depth }) => {
               const { render } = useThree(
                 {
-                  width: values.width,
-                  height: values.height,
-                  depth: values.depth,
+                  width,
+                  height,
+                  depth,
                 },
                 canvasMain
               )
               render()
-              setSubmitting(false)
             }}
           >
-            {({ isSubmitting }) => (
+            {() => (
               <Form>
                 <Field type="number" name="width" />
                 <div>Width</div>
@@ -56,7 +48,6 @@ export default function Home() {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  disabled={isSubmitting}
                   className={'submitButton'}
                 >
                   Create BOX

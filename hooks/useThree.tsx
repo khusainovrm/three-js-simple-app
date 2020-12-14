@@ -52,7 +52,7 @@ export const useThree = (
 
   function render() {
     requestAnimationFrame(render)
-    cube.rotation.x += 0.001
+    cube.rotation.x += 0.004
     cube.rotation.y += 0.005
     renderer.render(scene, camera)
   }
