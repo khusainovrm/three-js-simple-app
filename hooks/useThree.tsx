@@ -8,7 +8,6 @@ import {
   Scene,
   WebGLRenderer,
 } from 'three'
-import { HTMLElement } from 'node-html-parser'
 import { RefObject } from 'react'
 
 export const useThree = (
