@@ -5,17 +5,25 @@ import { useEffect, useRef } from 'react'
 import {
   AxesHelper,
   BoxGeometry,
+  Color,
   Mesh,
   MeshBasicMaterial,
+  MeshLambertMaterial,
   PerspectiveCamera,
   PlaneGeometry,
   Scene,
   SphereGeometry,
+  SpotLight,
   WebGLRenderer,
 } from 'three'
 
 const Custom = () => {
-  const canvasCustom = useRef<HTMLDivElement>(null)
+  const canvas = useRef<HTMLDivElement>(null)
+  const lightGrayBackground = new Color(0xeeeeee)
+  const grayPlane = new Color(0xcccccc)
+  const redCube = new Color(0xff0000)
+  const blueSphere = new Color(0x7777ff)
+  const white = new Color(0xffffff)
 
   useEffect(() => {
     const scene = new Scene()
@@ -26,14 +34,22 @@ const Custom = () => {
       1000
     )
     const renderer = new WebGLRenderer()
-    renderer.setClearColor(0xeeeeee)
+    renderer.setClearColor(lightGrayBackground, 1)
     renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.shadowMap.enabled = true
+
     const axes = new AxesHelper(20)
     scene.add(axes)
 
+    const spotLight = new SpotLight(white)
+    spotLight.position.set(-40, 60, -10)
+    spotLight.castShadow = true
+    scene.add(spotLight)
+
     const planeGeometry = new PlaneGeometry(60, 20, 1, 1)
-    const planeMaterial = new MeshBasicMaterial({ color: 0xcccccc })
+    const planeMaterial = new MeshLambertMaterial({ color: grayPlane })
     const plane = new Mesh(planeGeometry, planeMaterial)
+    plane.receiveShadow = true
     plane.rotation.x = -0.5 * Math.PI
     plane.position.x = 15
     plane.position.y = 0
@@ -41,22 +57,24 @@ const Custom = () => {
     scene.add(plane)
 
     const cubeGeometry = new BoxGeometry(4, 4, 4)
-    const cubeMaterial = new MeshBasicMaterial({
-      color: 0xff0000,
-      wireframe: true,
+    const cubeMaterial = new MeshLambertMaterial({
+      color: redCube,
+      wireframe: false,
     })
     const cube = new Mesh(cubeGeometry, cubeMaterial)
+    cube.castShadow = true
     cube.position.x = -4
     cube.position.y = 3
     cube.position.z = 0
     scene.add(cube)
 
     const sphereGeometry = new SphereGeometry(4, 20, 20)
-    const sphereMaterial = new MeshBasicMaterial({
-      color: 0x7777ff,
-      wireframe: true,
+    const sphereMaterial = new MeshLambertMaterial({
+      color: blueSphere,
+      wireframe: false,
     })
     const sphere = new Mesh(sphereGeometry, sphereMaterial)
+    sphere.castShadow = true
     sphere.position.x = 20
     sphere.position.y = 4
     sphere.position.z = 2
@@ -67,13 +85,16 @@ const Custom = () => {
     camera.position.z = 30
     camera.lookAt(scene.position)
 
-    canvasCustom.current?.appendChild(renderer.domElement)
+    const child = canvas.current?.firstChild
+    child ? canvas.current?.removeChild(child) : null
+
+    canvas.current?.appendChild(renderer.domElement)
     renderer.render(scene, camera)
   }, [])
 
   return (
     <MainLayout>
-      <div ref={canvasCustom} className={styles.mainCanvas} />
+      <div ref={canvas} className={styles.mainCanvas} />
       <div className={styles.content + ' App'}>
         <div>Custom Page</div>
         <Link href={'/'}>
