@@ -1,13 +1,15 @@
 import MainLayout from '../layout/mainLayout'
 import Link from 'next/link'
+// @ts-ignore
+import Stats from '../node_modules/stats.js/build/stats.min'
 import styles from '../styles/Custom.module.css'
 import { useEffect, useRef } from 'react'
+
 import {
   AxesHelper,
   BoxGeometry,
   Color,
   Mesh,
-  MeshBasicMaterial,
   MeshLambertMaterial,
   PerspectiveCamera,
   PlaneGeometry,
@@ -19,13 +21,25 @@ import {
 
 const Custom = () => {
   const canvas = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
   const lightGrayBackground = new Color(0xeeeeee)
   const grayPlane = new Color(0xcccccc)
   const redCube = new Color(0xff0000)
   const blueSphere = new Color(0x7777ff)
   const white = new Color(0xffffff)
 
+  const initStats = () => {
+    const stats = new Stats()
+    stats.setMode(0)
+    stats.domElement.style.position = 'absolute'
+    stats.domElement.style.left = '0px'
+    stats.domElement.style.top = '0px'
+    statsRef ? statsRef.current?.append(stats.domElement) : null
+    return stats
+  }
+
   useEffect(() => {
+    const stats = initStats()
     const scene = new Scene()
     const camera = new PerspectiveCamera(
       45,
@@ -89,12 +103,35 @@ const Custom = () => {
     child ? canvas.current?.removeChild(child) : null
 
     canvas.current?.appendChild(renderer.domElement)
-    renderer.render(scene, camera)
+
+    const controls = {
+      rotationSpeed: 0.02,
+      bouncingSpeed: 0.03,
+      step: 0,
+    }
+
+    const render = () => {
+      stats.update()
+
+      cube.rotation.x += controls.rotationSpeed
+      cube.rotation.y += controls.rotationSpeed
+      cube.rotation.z += controls.rotationSpeed
+
+      controls.step += controls.bouncingSpeed
+      sphere.position.x = 20 + 10 * Math.cos(controls.step)
+      sphere.position.y = 2 + 10 * Math.abs(Math.sin(controls.step))
+
+      requestAnimationFrame(render)
+      renderer.render(scene, camera)
+    }
+
+    render()
   }, [])
 
   return (
     <MainLayout>
       <div ref={canvas} className={styles.mainCanvas} />
+      <div ref={statsRef} />
       <div className={styles.content + ' App'}>
         <div>Custom Page</div>
         <Link href={'/'}>
